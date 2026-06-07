@@ -43,7 +43,7 @@ const SLIDES: Slide[] = [
     body: "Create a one-page brief you can share with a clinician — or keep just for yourself.",
   },
   {
-    image: require("../../assets/onboarding/slide5.png"),
+    image: require("../../assets/onboarding/slide5.jpg"),
     title: "Help is always here",
     body: "Find trusted resources and reach out any time. You don't have to handle this alone.",
   },

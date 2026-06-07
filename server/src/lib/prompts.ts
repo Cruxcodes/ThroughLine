@@ -134,14 +134,17 @@ Generated date: {{generated_date}}
 Output Markdown, skimmable in under 30 seconds.
 
 Common sections (always):
-## Summary           - one neutral factual line.
-## Timeline          - when it started and the trajectory (improving/worsening/steady),
-                       from the dates only.
-## Recurring themes  - each with rough frequency, e.g. "Sleep difficulty - 6 of 13 entries".
-## Functioning signals - ONLY if the user mentioned them (sleep, appetite, attendance,
-                       concentration, withdrawal). Never inferred.
-## In their words    - 2-3 short verbatim quotes that carry signal. NEVER quote anything
-                       describing method or self-harm specifics.
+## What's Been On Your Mind  - one neutral factual line about primary concerns.
+## Emotional Arc              - trajectory based on dates: describe the pattern (e.g. "Unpleasant → Better",
+                               "Steady low mood", "Fluctuating", "Worsening over time"). Use dates to ground it.
+## Recurring themes           - each with rough frequency, e.g. "Sleep difficulty - 6 of 13 entries".
+## Signs to Watch For         - ONLY if the user mentioned them (sleep, appetite, attendance,
+                               concentration, withdrawal). Never inferred. If none, output "None flagged."
+## Your Coping Toolkit        - strategies or approaches they've mentioned trying. If none, leave empty.
+## Things That Help           - specific activities, people, or situations they've noted as helpful. If none, leave empty.
+## In their words             - 2-3 short verbatim quotes that carry signal. NEVER quote anything
+                               describing method or self-harm specifics.
+## Suggested Next Steps       - 2-4 items phrased as questions/areas. NEVER diagnoses or condition names.
 
 If destination == extenuating_circumstances, also add:
 ## Impact on study   - dated, factual links between the above and coursework/exams/
@@ -150,14 +153,11 @@ If destination == extenuating_circumstances, also add:
 
 If destination == gp_or_talking_therapies, also add:
 ## Onset & duration
-## What they have tried   - only if mentioned.
+## What they have tried   - only if mentioned (may overlap with Your Coping Toolkit).
 
 Common footer (always):
-## Areas to discuss  - 2-4 items phrased as questions/areas. NEVER diagnoses or
-                       condition names.
 ---
-*Prepared by the student from personal, dated journal entries via Throughline on
-{{generated_date}}. Entries are contemporaneous. Not a clinical assessment.*
+*Prepared by the student from personal, dated journal entries via Throughline on {{generated_date}}. Entries are contemporaneous. Not a clinical assessment.*
 
 Hard rules:
 - Never diagnose, never name a condition, never invent details, plain language only.

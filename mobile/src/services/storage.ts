@@ -34,6 +34,7 @@ if (!seeded || seeded.n === 0) {
 }
 
 const ONBOARDING_KEY = "onboarding_complete";
+const REMINDER_SHOWN_KEY = "last_reminder_shown";
 
 export function hasCompletedOnboarding(): boolean {
   const row = db.getFirstSync<{ value: string }>(
@@ -48,6 +49,38 @@ export function markOnboardingComplete() {
     `INSERT OR REPLACE INTO prefs (key, value) VALUES (?, ?)`,
     [ONBOARDING_KEY, "1"]
   );
+}
+
+// Check whether to show an in-app reminder: true if it's been >24 hours since
+// the last journal entry AND >24 hours since we last showed a reminder.
+// This is a "local" approximation of a daily reminder that doesn't require
+// system notifications or a rebuild.
+export function shouldShowReminder(): boolean {
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const entries = getEntries();
+  const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null;
+  const lastEntryMs = lastEntry?.createdAt ?? 0;
+  const reminderRow = db.getFirstSync<{ value: string }>(
+    `SELECT value FROM prefs WHERE key = ?`,
+    [REMINDER_SHOWN_KEY]
+  );
+  const lastReminderMs = reminderRow?.value ? Number(reminderRow.value) : 0;
+  return now - lastEntryMs > dayMs && now - lastReminderMs > dayMs;
+}
+
+// Mark that we just showed a reminder (so we don't nag again for at least
+// 24 hours). Call after rendering the banner.
+export function markReminderShown() {
+  db.runSync(
+    `INSERT OR REPLACE INTO prefs (key, value) VALUES (?, ?)`,
+    [REMINDER_SHOWN_KEY, String(Date.now())]
+  );
+}
+
+// Reset reminder state (for testing/debugging — call from dev menu).
+export function clearReminderState() {
+  db.runSync(`DELETE FROM prefs WHERE key = ?`, [REMINDER_SHOWN_KEY]);
 }
 
 export function addEntry(e: Entry) {

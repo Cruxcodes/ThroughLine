@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import {
   ActivityIndicator,
   ImageBackground,
@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
 import { GroundingActivity } from "../src/components/GroundingActivity";
 import { GroundingTechniqueCard } from "../src/components/GroundingTechniqueCard";
 import { TipCard } from "../src/components/TipCard";
@@ -21,6 +22,7 @@ import {
   fetchSupportApi,
   processEntryApi,
 } from "../src/services/api";
+import { getEntries, shouldShowReminder, markReminderShown } from "../src/services/storage";
 import type { ProcessEntryResult, SupportResult } from "../src/lib/types";
 
 type Stage = "home" | "mood" | "grounding" | "write" | "submitting" | "result";
@@ -76,6 +78,7 @@ export default function TodayScreen() {
   const [outcome, setOutcome] = useState<ProcessEntryResult | null>(null);
   const [support, setSupport] = useState<SupportResult | null>(null);
   const [showGrounding, setShowGrounding] = useState(false);
+  const [showReminder, setShowReminder] = useState(false);
 
   const dictationBaseRef = useRef("");
   const { recognizing, error: voiceError, start: startVoice, stop: stopVoice } =
@@ -114,6 +117,7 @@ export default function TodayScreen() {
 
   async function submit() {
     if (text.trim().length === 0) return;
+    if (recognizing) stopVoice();
     setStage("submitting");
     const knownStressors = Array.from(
       new Set(entries.map((e) => e.stressor).filter((s): s is string => !!s && s.trim().length > 0))
@@ -152,6 +156,20 @@ export default function TodayScreen() {
     setStage("home");
   }
 
+  // Check for in-app reminder each time the Today tab regains focus:
+  // show a gentle banner if it's been >24h since the last entry AND >24h since
+  // we last reminded them. Mark the reminder so we don't nag again today.
+  useFocusEffect(
+    useCallback(() => {
+      if (shouldShowReminder()) {
+        setShowReminder(true);
+        markReminderShown();
+      } else {
+        setShowReminder(false);
+      }
+    }, [])
+  );
+
   const isCrisis = outcome?.analysis.risk_level === "crisis";
   const weekDates = getWeekDates();
   const lastEntry = entries[entries.length - 1] ?? null;
@@ -177,6 +195,20 @@ export default function TodayScreen() {
         {stage === "home" && (
           <>
             <Text style={styles.pageTitle}>Today</Text>
+
+            {showReminder && (
+              <View style={styles.reminderCard}>
+                <View style={styles.reminderIconWrap}>
+                  <Text style={styles.reminderIcon}>🕐</Text>
+                </View>
+                <View style={styles.reminderText}>
+                  <Text style={styles.reminderTitle}>You haven't written today</Text>
+                  <Text style={styles.reminderSub}>
+                    Taking a moment to check in can make a difference.
+                  </Text>
+                </View>
+              </View>
+            )}
 
             <View style={styles.calendarRow}>
               {weekDates.map((d, i) => (
@@ -368,15 +400,15 @@ export default function TodayScreen() {
             {voiceError ? <Text style={styles.voiceError}>{voiceError}</Text> : null}
 
             <Pressable
-              disabled={text.trim().length === 0}
+              disabled={text.trim().length === 0 || recognizing}
               onPress={submit}
               style={({ pressed }) => [
                 styles.cta,
-                text.trim().length === 0 && styles.ctaDisabled,
-                pressed && text.trim().length > 0 && styles.ctaPressed,
+                (text.trim().length === 0 || recognizing) && styles.ctaDisabled,
+                pressed && text.trim().length > 0 && !recognizing && styles.ctaPressed,
               ]}
             >
-              <Text style={styles.ctaText}>Save entry</Text>
+              <Text style={styles.ctaText}>{recognizing ? "Listening…" : "Save entry"}</Text>
             </Pressable>
           </>
         )}
@@ -606,6 +638,32 @@ const styles = StyleSheet.create({
   // ── Result
   crisisFull: { gap: 14 },
   crisisNote: { color: "#52605b", fontSize: 14, lineHeight: 20 },
+
+  // ── Reminder banner
+  reminderCard: {
+    backgroundColor: "#fffbf0",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#fdf2c2",
+    padding: 16,
+    marginTop: 12,
+    marginBottom: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  reminderIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#fef3c7",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reminderIcon: { fontSize: 22 },
+  reminderText: { flex: 1 },
+  reminderTitle: { fontSize: 15, fontWeight: "700", color: "#1d2b27", marginBottom: 2 },
+  reminderSub: { fontSize: 13, color: "#5c6b66", lineHeight: 18 },
   supportNote: { color: "#7a857f", fontSize: 14, marginTop: 18, fontStyle: "italic" },
   groundingBtn: {
     backgroundColor: "#fff", borderRadius: 14, borderWidth: 1, borderColor: "#cfe4dc",
