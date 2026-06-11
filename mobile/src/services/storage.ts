@@ -35,6 +35,7 @@ if (!seeded || seeded.n === 0) {
 
 const ONBOARDING_KEY = "onboarding_complete";
 const REMINDER_SHOWN_KEY = "last_reminder_shown";
+const MH_SUGGESTION_SHOWN_KEY = "mh_suggestion_shown";
 
 export function hasCompletedOnboarding(): boolean {
   const row = db.getFirstSync<{ value: string }>(
@@ -81,6 +82,22 @@ export function markReminderShown() {
 // Reset reminder state (for testing/debugging — call from dev menu).
 export function clearReminderState() {
   db.runSync(`DELETE FROM prefs WHERE key = ?`, [REMINDER_SHOWN_KEY]);
+}
+
+// Track whether we've shown the mental health support suggestion.
+export function shouldShowMHSuggestion(): boolean {
+  const row = db.getFirstSync<{ value: string }>(
+    `SELECT value FROM prefs WHERE key = ?`,
+    [MH_SUGGESTION_SHOWN_KEY]
+  );
+  return !row; // true if never shown before
+}
+
+export function markMHSuggestionShown() {
+  db.runSync(
+    `INSERT OR REPLACE INTO prefs (key, value) VALUES (?, ?)`,
+    [MH_SUGGESTION_SHOWN_KEY, "1"]
+  );
 }
 
 export function addEntry(e: Entry) {

@@ -10,7 +10,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import Toast from "react-native-toast-message";
 import { GroundingActivity } from "../src/components/GroundingActivity";
 import { GroundingTechniqueCard } from "../src/components/GroundingTechniqueCard";
 import { TipCard } from "../src/components/TipCard";
@@ -22,7 +23,7 @@ import {
   fetchSupportApi,
   processEntryApi,
 } from "../src/services/api";
-import { getEntries, shouldShowReminder, markReminderShown } from "../src/services/storage";
+import { getEntries, shouldShowReminder, markReminderShown, shouldShowMHSuggestion, markMHSuggestionShown } from "../src/services/storage";
 import type { ProcessEntryResult, SupportResult } from "../src/lib/types";
 
 type Stage = "home" | "mood" | "grounding" | "write" | "submitting" | "result";
@@ -71,6 +72,7 @@ function formatTodayLong() {
 
 export default function TodayScreen() {
   const { entries, add } = useEntries();
+  const router = useRouter();
   const [stage, setStage] = useState<Stage>("home");
   const [selectedMoodIdx, setSelectedMoodIdx] = useState<number | null>(null);
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
@@ -142,6 +144,37 @@ export default function TodayScreen() {
     if (result.analysis.risk_level !== "crisis") {
       setSupport(await fetchSupportApi(domain, result.analysis.risk_level));
     }
+
+    // Check if user has 3+ crisis entries and suggest mental health support
+    const updatedEntries = [...entries, {
+      id: String(now),
+      date: new Date().toISOString().slice(0, 10),
+      promptShown: "What's on your mind?",
+      text: text.trim(),
+      riskLevel: result.analysis.risk_level,
+      themes: result.analysis.themes,
+      domain,
+      stressor: result.analysis.related_stressor?.label,
+      createdAt: now,
+    }];
+    const crisisCount = updatedEntries.filter(e => e.riskLevel === "crisis").length;
+    if (crisisCount >= 3 && shouldShowMHSuggestion()) {
+      markMHSuggestionShown();
+      setTimeout(() => {
+        Toast.show({
+          type: "info",
+          text1: "You're not alone",
+          text2: "Consider reaching out to your mental health support team.",
+          position: "bottom",
+          bottomOffset: 80,
+          onPress: () => {
+            router.push("/support");
+            Toast.hide();
+          },
+        });
+      }, 500);
+    }
+
     setStage("result");
   }
 

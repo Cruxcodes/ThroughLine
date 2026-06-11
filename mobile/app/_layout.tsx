@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, type ColorValue } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { Onboarding } from "../src/components/Onboarding";
 import { UniversityPicker } from "../src/components/UniversityPicker";
 import {
@@ -61,39 +62,42 @@ export default function RootLayout() {
       ) : !pickedUniversity ? (
         <UniversityPicker onDone={() => setPickedUniversity(true)} />
       ) : (
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: ACTIVE,
-          tabBarInactiveTintColor: INACTIVE,
-          // White bar with a hairline top border (DESIGN.md §4) — flat, calm,
-          // depth from the hairline rather than a shadow.
-          tabBarStyle: {
-            backgroundColor: "#ffffff",
-            borderTopColor: "#eceeed",
-            borderTopWidth: StyleSheet.hairlineWidth,
-            elevation: 0,
-          },
-          tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
-        }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{ title: "Today", tabBarIcon: tabIcon("index") }}
-        />
-        <Tabs.Screen
-          name="timeline"
-          options={{ title: "Timeline", tabBarIcon: tabIcon("timeline") }}
-        />
-        <Tabs.Screen
-          name="brief"
-          options={{ title: "Brief", tabBarIcon: tabIcon("brief") }}
-        />
-        <Tabs.Screen
-          name="support"
-          options={{ title: "Support", tabBarIcon: tabIcon("support") }}
-        />
-      </Tabs>
+        <>
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: ACTIVE,
+            tabBarInactiveTintColor: INACTIVE,
+            // White bar with a hairline top border (DESIGN.md §4) — flat, calm,
+            // depth from the hairline rather than a shadow.
+            tabBarStyle: {
+              backgroundColor: "#ffffff",
+              borderTopColor: "#eceeed",
+              borderTopWidth: StyleSheet.hairlineWidth,
+              elevation: 0,
+            },
+            tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+          }}
+        >
+          <Tabs.Screen
+            name="index"
+            options={{ title: "Today", tabBarIcon: tabIcon("index") }}
+          />
+          <Tabs.Screen
+            name="timeline"
+            options={{ title: "Timeline", tabBarIcon: tabIcon("timeline") }}
+          />
+          <Tabs.Screen
+            name="brief"
+            options={{ title: "Brief", tabBarIcon: tabIcon("brief") }}
+          />
+          <Tabs.Screen
+            name="support"
+            options={{ title: "Support", tabBarIcon: tabIcon("support") }}
+          />
+        </Tabs>
+        <Toast />
+        </>
       )}
     </SafeAreaProvider>
   );
