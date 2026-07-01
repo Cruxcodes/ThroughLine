@@ -1,5 +1,4 @@
 import * as SQLite from "expo-sqlite";
-import { SEED_ENTRIES } from "../lib/seed";
 import type { Entry, University } from "../lib/types";
 
 const db = SQLite.openDatabaseSync("throughline.db");
@@ -28,10 +27,8 @@ db.execSync(`CREATE TABLE IF NOT EXISTS university (
 
 // Seed the demo account into the DB on first launch so the timeline reads real,
 // persistent data instead of a hardcoded array.
-const seeded = db.getFirstSync<{ n: number }>(`SELECT COUNT(*) AS n FROM entries`);
-if (!seeded || seeded.n === 0) {
-  for (const e of SEED_ENTRIES) addEntry(e);
-}
+// const seeded = db.getFirstSync<{ n: number }>(`SELECT COUNT(*) AS n FROM entries`);
+
 
 const ONBOARDING_KEY = "onboarding_complete";
 const REMINDER_SHOWN_KEY = "last_reminder_shown";
