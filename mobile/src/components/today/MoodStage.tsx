@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { EMOTIONS, MOODS } from "../../lib/checkin";
 import { formatTodayLong } from "../../lib/dates";
+import { color, font } from "../../lib/theme";
 import { sharedStyles } from "./sharedStyles";
 
 /**
@@ -26,7 +27,7 @@ export function MoodStage({
       <Text style={styles.pageSubtitle}>How are you doing today?</Text>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Mood</Text>
+        <Text style={styles.cardTitle}>MOOD</Text>
         <Text style={styles.cardHint}>How are you feeling today?</Text>
         <View style={styles.moodRow}>
           {MOODS.map((mood, i) => (
@@ -58,7 +59,7 @@ export function MoodStage({
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Emotions</Text>
+        <Text style={styles.cardTitle}>EMOTIONS</Text>
         <Text style={styles.cardHint}>
           What are you feeling? Pick all that apply.
         </Text>
@@ -125,9 +126,10 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1d2b27",
+    fontFamily: font.mono,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    color: color.primary,
     marginBottom: 4,
   },
   cardHint: { fontSize: 12, color: "#9aa5a1", marginBottom: 16 },

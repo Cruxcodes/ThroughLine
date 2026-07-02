@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { color, font } from "../../lib/theme";
 import type { ProcessEntryResult, SupportResult } from "../../lib/types";
 import { CrisisCard } from "../CrisisCard";
 import { GroundingTechniqueCard } from "../GroundingTechniqueCard";
@@ -95,13 +96,18 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   promptLabel: {
-    color: "#2f6f5e",
-    fontWeight: "700",
+    fontFamily: font.mono,
+    color: color.primary,
     fontSize: 11,
-    letterSpacing: 1,
-    marginBottom: 6,
+    letterSpacing: 1.4,
+    marginBottom: 8,
   },
-  promptText: { fontSize: 17, color: "#1d2b27", lineHeight: 24 },
+  promptText: {
+    fontFamily: font.displayItalic,
+    fontSize: 18,
+    color: color.textStrong,
+    lineHeight: 27,
+  },
 
   supportNote: {
     color: "#7a857f",

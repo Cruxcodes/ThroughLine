@@ -1,18 +1,13 @@
-import {
-  ImageBackground,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { getWeekDates } from "../../lib/dates";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { getTodayParts, getWeekDates } from "../../lib/dates";
+import { color, font } from "../../lib/theme";
 import type { Entry } from "../../lib/types";
-import { sharedStyles } from "./sharedStyles";
 
 /**
- * The Today tab's landing view: week calendar strip, the "Daily Thread" hero
- * card that starts a check-in, an optional gentle reminder banner, and a
- * preview of the most recent entry.
+ * The Today tab's landing view. The hero is typographic: today's date set
+ * huge in serif on a deep-sage panel — the date is the product (contemporaneous,
+ * dated evidence), so it gets the front page. Below it: the week strip, an
+ * optional gentle reminder, and a preview of the most recent entry.
  */
 export function HomeStage({
   showReminder,
@@ -24,25 +19,10 @@ export function HomeStage({
   onStart: () => void;
 }) {
   const weekDates = getWeekDates();
+  const today = getTodayParts();
 
   return (
     <>
-      <Text style={sharedStyles.pageTitle}>Today</Text>
-
-      {showReminder && (
-        <View style={styles.reminderCard}>
-          <View style={styles.reminderIconWrap}>
-            <Text style={styles.reminderIcon}>🕐</Text>
-          </View>
-          <View style={styles.reminderText}>
-            <Text style={styles.reminderTitle}>You haven't written today</Text>
-            <Text style={styles.reminderSub}>
-              Taking a moment to check in can make a difference.
-            </Text>
-          </View>
-        </View>
-      )}
-
       <View style={styles.calendarRow}>
         {weekDates.map((d, i) => (
           <View key={i} style={styles.calendarCell}>
@@ -73,37 +53,39 @@ export function HomeStage({
         ))}
       </View>
 
-      <View style={styles.divider} />
-
-      <ImageBackground
-        source={require("../../../assets/home/daily-thread-bg.jpg")}
-        style={styles.threadCard}
-        imageStyle={styles.threadCardBg}
-        resizeMode="cover"
-        accessibilityRole="image"
-        accessibilityLabel="Daily Thread landscape illustration"
-      >
-        <View style={styles.threadCardOverlay} pointerEvents="none" />
-        <View style={styles.threadCardContent}>
-          <Text style={styles.threadTitle}>Daily Thread</Text>
-          <Text style={styles.threadSub}>
-            A space to reflect, grow and stay aligned.
-          </Text>
-          <Pressable
-            onPress={onStart}
-            style={({ pressed }) => [
-              styles.startBtn,
-              pressed && styles.startBtnPressed,
-            ]}
-          >
-            <Text style={styles.startBtnText}>Start</Text>
-          </Pressable>
+      {showReminder && (
+        <View style={styles.reminderCard}>
+          <View style={styles.reminderText}>
+            <Text style={styles.reminderTitle}>You haven't written today</Text>
+            <Text style={styles.reminderSub}>
+              Taking a moment to check in can make a difference.
+            </Text>
+          </View>
         </View>
-      </ImageBackground>
+      )}
+
+      <View style={styles.heroPanel}>
+        <Text style={styles.heroEyebrow}>{today.weekday} · today's page</Text>
+        <Text style={styles.heroDate}>{today.dayMonth}</Text>
+        <Text style={styles.heroSub}>
+          Written today, in your words.{"\n"}It stays on your device.
+        </Text>
+        <Pressable
+          onPress={onStart}
+          accessibilityRole="button"
+          accessibilityLabel="Start today's entry"
+          style={({ pressed }) => [
+            styles.startBtn,
+            pressed && styles.startBtnPressed,
+          ]}
+        >
+          <Text style={styles.startBtnText}>Start today's entry</Text>
+        </Pressable>
+      </View>
 
       {lastEntry && (
         <>
-          <Text style={styles.sectionLabel}>RECENT ENTRIES</Text>
+          <Text style={styles.sectionLabel}>LAST ENTRY</Text>
           <View style={styles.entryPreviewCard}>
             <View
               style={[
@@ -111,10 +93,10 @@ export function HomeStage({
                 {
                   backgroundColor:
                     lastEntry.riskLevel === "crisis"
-                      ? "#b4453a"
+                      ? color.riskCrisis
                       : lastEntry.riskLevel === "elevated"
-                        ? "#e0a13c"
-                        : "#7fae9f",
+                        ? color.riskElevated
+                        : color.riskNone,
                 },
               ]}
             />
@@ -135,127 +117,102 @@ export function HomeStage({
 }
 
 const styles = StyleSheet.create({
+  calendarRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 4,
+    marginBottom: 22,
+  },
+  calendarCell: { alignItems: "center", flex: 1 },
+  calDayLabel: {
+    fontFamily: font.monoRegular,
+    fontSize: 10,
+    color: color.placeholder,
+    marginBottom: 6,
+  },
+  calDayLabelActive: { color: color.primary, fontFamily: font.mono },
+  calDateCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  calDateCircleActive: { backgroundColor: color.primary },
+  calDateText: {
+    fontFamily: font.monoRegular,
+    fontSize: 13,
+    color: color.textMuted,
+  },
+  calDateTextActive: { color: "#fff", fontFamily: font.mono },
+
   reminderCard: {
     backgroundColor: "#fffbf0",
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#fdf2c2",
     padding: 16,
-    marginTop: 12,
     marginBottom: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
   },
-  reminderIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#fef3c7",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  reminderIcon: { fontSize: 22 },
   reminderText: { flex: 1 },
   reminderTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#1d2b27",
+    color: color.textStrong,
     marginBottom: 2,
   },
   reminderSub: { fontSize: 13, color: "#5c6b66", lineHeight: 18 },
 
-  calendarRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  calendarCell: { alignItems: "center", flex: 1 },
-  calDayLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#9aa5a1",
-    marginBottom: 6,
-  },
-  calDayLabelActive: { color: "#2f6f5e" },
-  calDateCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "#eceeed",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  calDateCircleActive: { backgroundColor: "#2f6f5e" },
-  calDateText: { fontSize: 13, fontWeight: "500", color: "#52605b" },
-  calDateTextActive: { color: "#fff", fontWeight: "700" },
-
-  divider: { height: 1, backgroundColor: "#eceeed", marginBottom: 20 },
-
-  threadCard: {
+  heroPanel: {
+    backgroundColor: color.primary,
     borderRadius: 20,
-    overflow: "hidden",
+    padding: 26,
+    paddingTop: 30,
+    marginBottom: 26,
+  },
+  heroEyebrow: {
+    fontFamily: font.mono,
+    fontSize: 11,
+    letterSpacing: 1.6,
+    color: "#bfe0d6",
+    textTransform: "uppercase",
+    marginBottom: 10,
+  },
+  heroDate: {
+    fontFamily: font.display,
+    fontSize: 52,
+    lineHeight: 58,
+    color: "#f7faf9",
+    marginBottom: 12,
+  },
+  heroSub: {
+    fontFamily: font.displayItalic,
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#d4e5de",
     marginBottom: 24,
-    minHeight: 360,
-    justifyContent: "flex-end",
-  },
-  threadCardBg: { borderRadius: 20 },
-  threadCardOverlay: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: "55%",
-    backgroundColor: "rgba(247, 250, 249, 0.55)",
-  },
-  threadCardContent: {
-    padding: 24,
-    paddingTop: 160,
-    alignItems: "center",
-  },
-  threadTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#1d2b27",
-    marginBottom: 6,
-    textAlign: "center",
-    textShadowColor: "rgba(247, 250, 249, 0.9)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
-  },
-  threadSub: {
-    fontSize: 13,
-    color: "#52605b",
-    marginBottom: 20,
-    textAlign: "center",
-    lineHeight: 18,
-    maxWidth: 260,
-    textShadowColor: "rgba(247, 250, 249, 0.85)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
   },
   startBtn: {
-    backgroundColor: "#2f6f5e",
+    backgroundColor: "#f7faf9",
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: "center",
-    width: "100%",
   },
-  startBtnPressed: { backgroundColor: "#255647" },
-  startBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+  startBtnPressed: { backgroundColor: "#e0ece8" },
+  startBtnText: { color: color.primaryPressed, fontWeight: "700", fontSize: 16 },
 
   sectionLabel: {
+    fontFamily: font.mono,
     fontSize: 10,
-    fontWeight: "600",
-    color: "#9aa5a1",
-    letterSpacing: 1,
+    color: color.placeholder,
+    letterSpacing: 1.4,
     marginBottom: 10,
   },
   entryPreviewCard: {
-    backgroundColor: "#fff",
+    backgroundColor: color.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#eceeed",
+    borderColor: color.hairline,
     flexDirection: "row",
     alignItems: "flex-start",
     padding: 14,
@@ -263,6 +220,16 @@ const styles = StyleSheet.create({
   },
   entryPreviewDot: { width: 10, height: 10, borderRadius: 5, marginTop: 3 },
   entryPreviewBody: { flex: 1 },
-  entryPreviewMeta: { fontSize: 11, color: "#9aa5a1", marginBottom: 4 },
-  entryPreviewText: { fontSize: 13, color: "#1d2b27", lineHeight: 18 },
+  entryPreviewMeta: {
+    fontFamily: font.monoRegular,
+    fontSize: 11,
+    color: color.placeholder,
+    marginBottom: 4,
+  },
+  entryPreviewText: {
+    fontFamily: font.displayLight,
+    fontSize: 14,
+    color: color.textStrong,
+    lineHeight: 21,
+  },
 });

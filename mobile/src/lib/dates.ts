@@ -27,3 +27,12 @@ export function formatTodayLong(): string {
     month: "long",
   });
 }
+
+/** Today split for the home hero: { weekday: "Thursday", dayMonth: "11 June" }. */
+export function getTodayParts(): { weekday: string; dayMonth: string } {
+  const now = new Date();
+  return {
+    weekday: now.toLocaleDateString("en-GB", { weekday: "long" }),
+    dayMonth: now.toLocaleDateString("en-GB", { day: "numeric", month: "long" }),
+  };
+}

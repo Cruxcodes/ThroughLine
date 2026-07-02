@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getEntries } from "../src/services/storage";
+import { font, kicker, screenTitle } from "../src/lib/theme";
 import { BiggestCauses } from "../src/components/BiggestCauses";
 import { WeatherBand } from "../src/components/WeatherBand";
 import type { Entry } from "../src/lib/types";
@@ -80,14 +81,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#f7faf9" },
   screen: { flex: 1, backgroundColor: "#f7faf9" },
   content: { padding: 20, paddingBottom: 48 },
-  kicker: {
-    color: "#2f6f5e",
-    fontWeight: "700",
-    fontSize: 12,
-    letterSpacing: 1.2,
-    marginBottom: 6,
-  },
-  h1: { fontSize: 24, fontWeight: "800", color: "#1d2b27", lineHeight: 30 },
+  kicker: { ...kicker, marginBottom: 6 },
+  h1: { ...screenTitle, fontSize: 27, lineHeight: 33 },
   note: { color: "#7b8884", fontSize: 13, lineHeight: 19, marginTop: 8, marginBottom: 16 },
   empty: { color: "#7b8884", fontSize: 14, lineHeight: 20, marginTop: 8 },
   row: { flexDirection: "row", gap: 12 },
@@ -104,8 +99,14 @@ const styles = StyleSheet.create({
   },
   connector: { width: 2, flex: 1, backgroundColor: "#dde8e3", borderRadius: 1, marginTop: 2 },
   rowBody: { flex: 1, paddingBottom: 22 },
-  date: { color: "#7b8884", fontSize: 12, fontWeight: "600" },
-  text: { color: "#2b3733", fontSize: 14, lineHeight: 20, marginTop: 2 },
+  date: { fontFamily: font.monoRegular, color: "#7b8884", fontSize: 11, letterSpacing: 0.4 },
+  text: {
+    fontFamily: font.displayLight,
+    color: "#2b3733",
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: 3,
+  },
   chip: {
     alignSelf: "flex-start",
     backgroundColor: "#eef5f2",
@@ -116,5 +117,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 6,
   },
-  chipText: { color: "#2f6f5e", fontSize: 12, fontWeight: "600" },
+  chipText: { fontFamily: font.monoRegular, color: "#2f6f5e", fontSize: 11 },
 });

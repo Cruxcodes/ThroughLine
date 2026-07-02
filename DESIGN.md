@@ -79,7 +79,13 @@ These are pulled directly from the current build — use them as the source of t
 
 ### Typography
 
-System font (San Francisco / Roboto). Weight and size do the work, not typeface.
+Two custom voices over a system-font body (loaded via `expo-font` / `@expo-google-fonts`, tokens in `mobile/src/lib/theme.ts`):
+
+- **Fraunces (serif)** — the *human* voice: screen titles, the journal editor, reflective prompts, quoted entries, the brief's doc title. The user's words are set in the same face as the document they become.
+- **IBM Plex Mono** — the *record* voice: kickers, dates, calendar strip, timeline stamps, chips, tags, tab labels, brief section labels. Dates are the product's evidence, so everything evidentiary shares the ledger face.
+- **System font** (San Francisco / Roboto) — body copy, hints, buttons, for legibility.
+
+RN ignores `fontWeight` on custom faces — weight is baked into the family name (`Fraunces_600SemiBold` etc.); never pair a theme font with a `fontWeight` style. The signature moment is the Today home hero: today's date set huge in serif on a deep-sage panel (`HomeStage`).
 
 | Style | Size | Weight | Notes |
 |---|---|---|---|

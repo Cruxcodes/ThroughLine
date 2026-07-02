@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { rankCauses } from "../lib/causes";
+import { kicker } from "../lib/theme";
 import { useCauseTips } from "../hooks/useCauseTips";
 import type { Entry } from "../lib/types";
 
@@ -79,13 +80,7 @@ function CauseTip({ state }: { state: ReturnType<typeof useCauseTips>[string] })
 
 const styles = StyleSheet.create({
   section: { marginBottom: 20 },
-  kicker: {
-    color: "#2f6f5e",
-    fontWeight: "700",
-    fontSize: 12,
-    letterSpacing: 1.2,
-    marginBottom: 10,
-  },
+  kicker: { ...kicker, marginBottom: 10 },
   empty: { color: "#7b8884", fontSize: 14, lineHeight: 20 },
   card: {
     backgroundColor: "#eef5f2",

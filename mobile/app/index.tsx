@@ -107,13 +107,9 @@ export default function TodayScreen() {
     setStage("submitting");
 
     // Classify + reflect in parallel, then store the tagged entry.
-    const knownStressors = Array.from(
-      new Set(
-        entries
-          .map((e) => e.stressor)
-          .filter((s): s is string => !!s && s.trim().length > 0),
-      ),
-    ).map((label) => ({ label, domain: "general" as const }));
+    const knownStressors = [
+      ...new Set(entries.map((e) => e.stressor?.trim()).filter(Boolean) as string[]),
+    ].map((label) => ({ label, domain: "general" as const }));
     const [domain, result] = await Promise.all([
       classifyDomainApi(text.trim()),
       processEntryApi(entries, text.trim(), knownStressors),

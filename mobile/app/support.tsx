@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CrisisCard } from "../src/components/CrisisCard";
 import { UniversityCard } from "../src/components/UniversityCard";
+import { kicker, screenTitle } from "../src/lib/theme";
 import { getUniversity } from "../src/services/storage";
 
 export default function SupportScreen() {
@@ -64,23 +65,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 4,
   },
-  kicker: {
-    color: "#2f6f5e",
-    fontWeight: "700",
-    fontSize: 12,
-    letterSpacing: 1.2,
-    marginBottom: 6,
-  },
-  h1: { fontSize: 28, fontWeight: "800", color: "#1d2b27", lineHeight: 34 },
+  kicker: { ...kicker, marginBottom: 6 },
+  h1: { ...screenTitle },
   sub: { fontSize: 15, color: "#52605b", lineHeight: 22, marginBottom: 6 },
   subEmphasis: { fontStyle: "italic", color: "#2f6f5e" },
 
   section: { marginTop: 24 },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: "700",
+    ...kicker,
+    fontSize: 10,
     color: "#9aa5a1",
-    letterSpacing: 1,
     marginBottom: 10,
   },
 });

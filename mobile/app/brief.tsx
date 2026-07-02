@@ -13,6 +13,7 @@ import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Markdown from "react-native-markdown-display";
 import { useBriefSender } from "../src/hooks/useBriefSender";
+import { font, kicker, screenTitle } from "../src/lib/theme";
 import { getEntries } from "../src/services/storage";
 import { exportJournalPdf } from "../src/lib/pdfExport";
 import type { Entry } from "../src/lib/types";
@@ -180,14 +181,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 4,
   },
-  kicker: {
-    color: "#2f6f5e",
-    fontWeight: "700",
-    fontSize: 12,
-    letterSpacing: 1.2,
-    marginBottom: 6,
-  },
-  h1: { fontSize: 28, fontWeight: "800", color: "#1d2b27", lineHeight: 34 },
+  kicker: { ...kicker, marginBottom: 6 },
+  h1: { ...screenTitle },
   sub: { fontSize: 15, color: "#52605b", lineHeight: 22, marginBottom: 4 },
 
   emptyCard: {
@@ -279,27 +274,28 @@ const styles = StyleSheet.create({
   footnote: { color: "#7b8884", fontSize: 13, marginTop: 14, fontStyle: "italic" },
 });
 
+// Document-grade hierarchy (DESIGN.md §5.3): serif doc title, mono section
+// labels over hairline rules, serif quotes — credibility from structure.
 const markdownStyles = {
   heading1: {
-    fontSize: 20,
-    fontWeight: "800",
+    fontFamily: font.display,
+    fontSize: 21,
     color: "#1d2b27",
     marginTop: 8,
-    letterSpacing: 0.2,
   },
   heading2: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontFamily: font.mono,
+    fontSize: 12,
     color: "#2f6f5e",
     textTransform: "uppercase",
-    letterSpacing: 1,
+    letterSpacing: 1.4,
     marginTop: 20,
     marginBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#eceeed",
     paddingBottom: 6,
   },
-  body: { color: "#2b3733", fontSize: 15, lineHeight: 22 },
+  body: { color: "#2b3733", fontSize: 15, lineHeight: 23 },
   blockquote: {
     backgroundColor: "#f1f5f4",
     borderLeftWidth: 3,
@@ -309,7 +305,7 @@ const markdownStyles = {
     paddingVertical: 8,
     marginVertical: 6,
     color: "#52605b",
-    fontStyle: "italic",
+    fontFamily: font.displayItalic,
   },
   hr: { backgroundColor: "#eceeed", height: 1, marginVertical: 18 },
 } as const;

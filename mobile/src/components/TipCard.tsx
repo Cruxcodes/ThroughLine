@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { font } from "../lib/theme";
 import type { Domain, Tip } from "../lib/types";
 import { fetchTipApi } from "../services/api";
 
@@ -52,7 +53,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     gap: 6,
   },
-  tag: { color: "#2f6f5e", fontWeight: "700", fontSize: 11, letterSpacing: 1 },
+  tag: { fontFamily: font.mono, color: "#2f6f5e", fontSize: 11, letterSpacing: 1.4 },
   tip: { fontSize: 16, color: "#1d2b27", lineHeight: 23 },
   source: { fontSize: 13, color: "#5c6b66", fontWeight: "600" },
   actions: {

@@ -25,11 +25,6 @@ db.execSync(`CREATE TABLE IF NOT EXISTS university (
   key TEXT NOT NULL, name TEXT NOT NULL, city TEXT, serviceName TEXT,
   phone TEXT, email TEXT, url TEXT NOT NULL, notes TEXT );`);
 
-// Seed the demo account into the DB on first launch so the timeline reads real,
-// persistent data instead of a hardcoded array.
-// const seeded = db.getFirstSync<{ n: number }>(`SELECT COUNT(*) AS n FROM entries`);
-
-
 const ONBOARDING_KEY = "onboarding_complete";
 const REMINDER_SHOWN_KEY = "last_reminder_shown";
 const MH_SUGGESTION_SHOWN_KEY = "mh_suggestion_shown";

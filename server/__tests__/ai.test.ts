@@ -14,59 +14,33 @@ import {
 } from "../src/services/ai";
 import type { Entry } from "../src/lib/types";
 
+/** Make the next Claude call(s) reply with `text`. */
+const claudeReplies = (text: string) =>
+  mockCreate.mockResolvedValue({ content: [{ type: "text", text }] });
+
 beforeEach(() => {
-  // GLM transport (processEntry / routeBrief still use fetch).
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({
-      choices: [{ message: { content: "## Summary\nlow mood" } }],
-    }),
-  }));
-  // Brief generation goes through Claude.
   mockCreate.mockReset();
-  mockCreate.mockResolvedValue({
-    content: [{ type: "text", text: "## Summary\nlow mood" }],
-  });
+  claudeReplies("## Summary\nlow mood");
 });
 
-afterEach(() => jest.restoreAllMocks());
-
 test("classifyDomain returns the model's chosen domain", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({
-      choices: [{ message: { content: '{"domain":"exam_stress"}' } }],
-    }),
-  }));
+  claudeReplies('{"domain":"exam_stress"}');
   expect(await classifyDomain("exams are crushing me")).toBe("exam_stress");
 });
 
 test("classifyDomain tolerates fenced JSON and a bare word", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({
-      choices: [{ message: { content: '```json\n{"domain":"loneliness"}\n```' } }],
-    }),
-  }));
+  claudeReplies('```json\n{"domain":"loneliness"}\n```');
   expect(await classifyDomain("nobody talks to me")).toBe("loneliness");
 
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({ choices: [{ message: { content: "financial_anxiety" } }] }),
-  }));
+  claudeReplies("financial_anxiety");
   expect(await classifyDomain("rent is due and I'm broke")).toBe("financial_anxiety");
 });
 
 test("classifyDomain fails safe to general on garbage or network error", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({ choices: [{ message: { content: "not a domain" } }] }),
-  }));
+  claudeReplies("not a domain");
   expect(await classifyDomain("anything")).toBe("general");
 
-  (global as any).fetch = jest.fn(async () => {
-    throw new Error("network down");
-  });
+  mockCreate.mockRejectedValue(new Error("network down"));
   expect(await classifyDomain("anything")).toBe("general");
 });
 
@@ -86,19 +60,9 @@ test("generateBrief surfaces Claude errors", async () => {
 });
 
 test("processEntry parses JSON (incl. fenced) into analysis with domain", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({
-      choices: [
-        {
-          message: {
-            content:
-              '```json\n{"next_prompt":"You mentioned the 9am — what makes mornings hardest?","risk_level":"elevated","risk_rationale":"persistent low mood","themes":["sleep","low mood"],"domain":"exam_stress"}\n```',
-          },
-        },
-      ],
-    }),
-  }));
+  claudeReplies(
+    '```json\n{"next_prompt":"You mentioned the 9am — what makes mornings hardest?","risk_level":"elevated","risk_rationale":"persistent low mood","themes":["sleep","low mood"],"domain":"exam_stress"}\n```'
+  );
   const a = await processEntry(
     [{ id: "1", date: "2026-05-22", text: "missed the 9am", createdAt: 0 } as Entry],
     "still can't sleep"
@@ -110,19 +74,9 @@ test("processEntry parses JSON (incl. fenced) into analysis with domain", async 
 });
 
 test("processEntry relates the entry to an existing stressor (isNew=false)", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({
-      choices: [
-        {
-          message: {
-            content:
-              '{"next_prompt":"q","risk_level":"elevated","risk_rationale":"r","themes":["exam-pressure"],"domain":"exam_stress","related_stressor":{"label":"Final exams","domain":"exam_stress"}}',
-          },
-        },
-      ],
-    }),
-  }));
+  claudeReplies(
+    '{"next_prompt":"q","risk_level":"elevated","risk_rationale":"r","themes":["exam-pressure"],"domain":"exam_stress","related_stressor":{"label":"Final exams","domain":"exam_stress"}}'
+  );
   const a = await processEntry([], "exams next week", [
     { label: "Final exams", domain: "exam_stress" },
   ]);
@@ -134,19 +88,9 @@ test("processEntry relates the entry to an existing stressor (isNew=false)", asy
 });
 
 test("processEntry marks a brand-new stressor as isNew=true", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({
-      choices: [
-        {
-          message: {
-            content:
-              '{"next_prompt":"q","risk_level":"elevated","risk_rationale":"r","themes":["money"],"domain":"financial_anxiety","related_stressor":{"label":"Rent","domain":"financial_anxiety"}}',
-          },
-        },
-      ],
-    }),
-  }));
+  claudeReplies(
+    '{"next_prompt":"q","risk_level":"elevated","risk_rationale":"r","themes":["money"],"domain":"financial_anxiety","related_stressor":{"label":"Rent","domain":"financial_anxiety"}}'
+  );
   const a = await processEntry([], "worried about rent", [
     { label: "Final exams", domain: "exam_stress" },
   ]);
@@ -155,56 +99,31 @@ test("processEntry marks a brand-new stressor as isNew=true", async () => {
 });
 
 test("processEntry fails safe to elevated on unparseable output", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({ choices: [{ message: { content: "not json at all" } }] }),
-  }));
+  claudeReplies("not json at all");
   const a = await processEntry([], "today was hard");
   expect(a.risk_level).toBe("elevated");
   expect(a.domain).toBe("general");
 });
 
 test("processEntry forces empty next_prompt on crisis", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({
-      choices: [
-        {
-          message: {
-            content:
-              '{"next_prompt":"should not survive","risk_level":"crisis","risk_rationale":"explicit intent","themes":["crisis"],"domain":"general"}',
-          },
-        },
-      ],
-    }),
-  }));
+  claudeReplies(
+    '{"next_prompt":"should not survive","risk_level":"crisis","risk_rationale":"explicit intent","themes":["crisis"],"domain":"general"}'
+  );
   const a = await processEntry([], "farewell");
   expect(a.risk_level).toBe("crisis");
   expect(a.next_prompt).toBe("");
 });
 
 test("processEntry fails safe when the network throws", async () => {
-  (global as any).fetch = jest.fn(async () => {
-    throw new Error("network down");
-  });
+  mockCreate.mockRejectedValue(new Error("network down"));
   const a = await processEntry([], "anything");
   expect(a.risk_level).toBe("elevated");
 });
 
 test("routeBrief returns a destination category", async () => {
-  (global as any).fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({
-      choices: [
-        {
-          message: {
-            content:
-              '{"primary_destination":"wellbeing_team","brief_format":"extenuating_circumstances","rationale":"you could share this with your wellbeing team","confidence":"medium"}',
-          },
-        },
-      ],
-    }),
-  }));
+  claudeReplies(
+    '{"primary_destination":"wellbeing_team","brief_format":"extenuating_circumstances","rationale":"you could share this with your wellbeing team","confidence":"medium"}'
+  );
   const r = await routeBrief(["exam-pressure", "sleep"], "elevated");
   expect(r.primary_destination).toBe("wellbeing_team");
   expect(r.brief_format).toBe("extenuating_circumstances");

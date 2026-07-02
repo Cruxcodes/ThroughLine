@@ -22,8 +22,7 @@ export async function fetchUniversitiesApi(): Promise<University[]> {
     const r = await fetch(`${BASE}/api/universities`);
     if (!r.ok) throw new Error("universities failed");
     return (await r.json()).universities ?? [];
-  } catch (error) {
-    console.error("Error in fetchUniversitiesApi:", error);
+  } catch {
     return [];
   }
 }
@@ -52,9 +51,7 @@ export async function classifyDomainApi(text: string): Promise<Domain> {
     });
     if (!r.ok) throw new Error("domain failed");
     return (await r.json()).domain;
-  } catch (error) {
-    console.error("Error in classifyDomainApi:", error);
-    throw error;
+  } catch {
     return "general";
   }
 }
@@ -131,19 +128,13 @@ export async function generateBriefApi(
   entries: Entry[],
   destination?: BriefDestination
 ): Promise<string> {
-  try {
-    console.log("generateBriefApi", entries, destination);
-    const r = await fetch(`${BASE}/api/brief/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ entries, destination }),
-    });
-    if (!r.ok) throw new Error("generate failed");
-    return (await r.json()).briefMarkdown;
-  } catch (error) {
-    console.error("Error in generateBriefApi:", error);
-    throw error;
-  }
+  const r = await fetch(`${BASE}/api/brief/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ entries, destination }),
+  });
+  if (!r.ok) throw new Error("generate failed");
+  return (await r.json()).briefMarkdown;
 }
 
 export async function sendBriefApi(p: {

@@ -1,9 +1,20 @@
+import {
+  Fraunces_400Regular,
+  Fraunces_400Regular_Italic,
+  Fraunces_600SemiBold,
+} from "@expo-google-fonts/fraunces";
+import {
+  IBMPlexMono_400Regular,
+  IBMPlexMono_500Medium,
+} from "@expo-google-fonts/ibm-plex-mono";
 import { Ionicons } from "@expo/vector-icons";
+import { useFonts } from "expo-font";
 import { Tabs } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, type ColorValue } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import { font } from "../src/lib/theme";
 import { Onboarding } from "../src/components/Onboarding";
 import { UniversityPicker } from "../src/components/UniversityPicker";
 import {
@@ -46,6 +57,16 @@ function tabIcon(name: keyof typeof TAB_ICON) {
 }
 
 export default function RootLayout() {
+  // Fonts are bundled locally, so this resolves in a frame — no splash needed.
+  const [fontsLoaded] = useFonts({
+    Fraunces_400Regular,
+    Fraunces_400Regular_Italic,
+    Fraunces_600SemiBold,
+    IBMPlexMono_400Regular,
+    IBMPlexMono_500Medium,
+  });
+  if (!fontsLoaded) return null;
+
   return (
     <SafeAreaProvider>
       <AppGate />
@@ -100,7 +121,12 @@ function MainTabs() {
             borderTopWidth: StyleSheet.hairlineWidth,
             elevation: 0,
           },
-          tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+          // The record voice carries into the tab bar — mono, tracked out.
+          tabBarLabelStyle: {
+            fontFamily: font.mono,
+            fontSize: 10,
+            letterSpacing: 0.5,
+          },
         }}
       >
         <Tabs.Screen

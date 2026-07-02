@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { font } from "../lib/theme";
 
 type Slide = {
   image: ImageSourcePropType;
@@ -157,11 +158,11 @@ const styles = StyleSheet.create({
   },
   image: { width: "100%", height: "100%" },
   title: {
-    fontSize: 26,
-    fontWeight: "800",
+    fontFamily: font.display,
+    fontSize: 27,
     color: "#1d2b27",
     textAlign: "center",
-    lineHeight: 32,
+    lineHeight: 34,
     marginBottom: 12,
   },
   body: {

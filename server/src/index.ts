@@ -7,9 +7,7 @@ import { universitiesRouter } from "./routes/universities";
 
 export const app = express();
 app.use(cors());
-// Parse incoming JSON requests with a payload limit of 1mb
-// app.use(express.json({ limit: "1mb" }));
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
 app.use("/api/brief", briefRouter);
 app.use("/api/entry", entryRouter);

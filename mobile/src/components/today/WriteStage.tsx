@@ -7,6 +7,7 @@ import {
   View,
 } from "react-native";
 import { JOURNAL_PROMPTS } from "../../lib/checkin";
+import { color, font } from "../../lib/theme";
 import { sharedStyles } from "./sharedStyles";
 
 /**
@@ -126,9 +127,15 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     paddingHorizontal: 14,
   },
-  promptChipText: { fontSize: 12, fontWeight: "500", color: "#2f6f5e" },
+  promptChipText: {
+    fontFamily: font.monoRegular,
+    fontSize: 11,
+    color: color.primary,
+  },
 
   inputWrap: { position: "relative", marginBottom: 8 },
+  // The editor is set in the same serif as the brief — your words already
+  // look like the document they'll become.
   input: {
     backgroundColor: "#fff",
     borderRadius: 14,
@@ -137,7 +144,9 @@ const styles = StyleSheet.create({
     minHeight: 180,
     padding: 16,
     paddingBottom: 56,
-    fontSize: 16,
+    fontFamily: font.displayLight,
+    fontSize: 17,
+    lineHeight: 26,
     color: "#1d2b27",
   },
   micBtn: {

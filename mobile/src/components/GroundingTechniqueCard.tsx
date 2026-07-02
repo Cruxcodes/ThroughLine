@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { font } from "../lib/theme";
 import type { Grounding } from "../lib/types";
 import { GroundingActivity } from "./GroundingActivity";
 
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     gap: 10,
   },
-  tag: { color: "#2f6f5e", fontWeight: "700", fontSize: 11, letterSpacing: 1 },
+  tag: { fontFamily: font.mono, color: "#2f6f5e", fontSize: 11, letterSpacing: 1.4 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   icon: { fontSize: 30 },
   titleText: { flex: 1 },
