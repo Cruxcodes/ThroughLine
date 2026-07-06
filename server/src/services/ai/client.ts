@@ -43,7 +43,7 @@ export async function claudeChat(
   user: string,
 ): Promise<string> {
   const m = await anthropic.messages.create({
-    model: "claude-sonnet-4-5",
+    model: "claude-haiku-4-5-202510012",
     max_tokens: 2000,
     system,
     messages: [{ role: "user", content: user }],
