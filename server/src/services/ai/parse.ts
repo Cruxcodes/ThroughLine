@@ -1,9 +1,10 @@
-import type {
-  Domain,
-  EntryAnalysis,
-  ExtractedStressor,
-  RelatedStressor,
-  RiskLevel,
+import {
+  isDomain,
+  type Domain,
+  type EntryAnalysis,
+  type ExtractedStressor,
+  type RelatedStressor,
+  type RiskLevel,
 } from "../../lib/types";
 
 /**
@@ -18,13 +19,8 @@ export function stripFences(raw: string): string {
 
 const VALID_RISK: RiskLevel[] = ["none", "elevated", "crisis"];
 
-export const VALID_DOMAIN: Domain[] = [
-  "exam_stress",
-  "body_image",
-  "loneliness",
-  "financial_anxiety",
-  "general",
-];
+/** Any domain outside the vocabulary becomes "general" rather than reaching the client. */
+const safeDomain = (raw: unknown): Domain => (isDomain(raw) ? raw : "general");
 
 /** Keep only well-formed stressors, cap at 3, and de-dupe by label (case-insensitive). */
 function parseStressors(raw: unknown): ExtractedStressor[] {
@@ -37,10 +33,7 @@ function parseStressors(raw: unknown): ExtractedStressor[] {
     const key = label.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    const domain: Domain = VALID_DOMAIN.includes(s?.domain)
-      ? s.domain
-      : "general";
-    out.push({ label, domain });
+    out.push({ label, domain: safeDomain(s?.domain) });
     if (out.length === 3) break;
   }
   return out;
@@ -59,13 +52,10 @@ function parseRelatedStressor(
   const r = raw as { label?: unknown; domain?: unknown };
   const label = typeof r.label === "string" ? r.label.trim() : "";
   if (!label) return null;
-  const domain: Domain = VALID_DOMAIN.includes(r.domain as Domain)
-    ? (r.domain as Domain)
-    : "general";
   const isNew = !existing.some(
     (s) => s.label.toLowerCase() === label.toLowerCase(),
   );
-  return { label, domain, isNew };
+  return { label, domain: safeDomain(r.domain), isNew };
 }
 
 /**
@@ -103,7 +93,7 @@ export function safeParseAnalysis(
     risk_rationale:
       typeof parsed.risk_rationale === "string" ? parsed.risk_rationale : "",
     themes: Array.isArray(parsed.themes) ? parsed.themes : [],
-    domain: (parsed.domain as EntryAnalysis["domain"]) ?? "general",
+    domain: safeDomain(parsed.domain),
     stressors: parseStressors((parsed as { stressors?: unknown }).stressors),
     related_stressor: parseRelatedStressor(
       (parsed as { related_stressor?: unknown }).related_stressor,

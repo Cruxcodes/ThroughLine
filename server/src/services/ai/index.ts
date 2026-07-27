@@ -4,17 +4,18 @@ import {
   ENTRY_SYSTEM,
   ROUTE_SYSTEM,
 } from "../../lib/prompts";
-import type {
-  BriefDestination,
-  Domain,
-  Entry,
-  EntryAnalysis,
-  ExtractedStressor,
-  RiskLevel,
-  RouteSuggestion,
+import {
+  isDomain,
+  type BriefDestination,
+  type Domain,
+  type Entry,
+  type EntryAnalysis,
+  type ExtractedStressor,
+  type RiskLevel,
+  type RouteSuggestion,
 } from "../../lib/types";
 import { claudeChat } from "./client";
-import { safeParseAnalysis, stripFences, VALID_DOMAIN } from "./parse";
+import { safeParseAnalysis, stripFences } from "./parse";
 
 /**
  * The four model calls behind the API. Transports live in `./client`
@@ -39,23 +40,31 @@ export async function classifyDomain(text: string): Promise<Domain> {
   const cleaned = stripFences(raw);
   // Prefer the JSON shape, but tolerate a bare domain word if the model drifts.
   try {
-    const parsed = JSON.parse(cleaned) as { domain?: unknown };
-    if (VALID_DOMAIN.includes(parsed.domain as Domain)) {
-      return parsed.domain as Domain;
-    }
+    const { domain } = JSON.parse(cleaned) as { domain?: unknown };
+    if (isDomain(domain)) return domain;
   } catch {
-    const word = cleaned.replace(/["'.\s]/g, "") as Domain;
-    if (VALID_DOMAIN.includes(word)) return word;
+    const word = cleaned.replace(/["'.\s]/g, "");
+    if (isDomain(word)) return word;
   }
   return "general";
 }
+
+/**
+ * Hard bound on prompt context. The app already sends a rolling window, but the
+ * payload is untrusted and every entry forwarded is health data reaching Anthropic,
+ * so the server caps it too (COMPLIANCE.md C5.4). Entries arrive oldest-first.
+ */
+const MAX_RECENT_ENTRIES = 20;
 
 export async function processEntry(
   recent: Entry[],
   today: string,
   existingStressors: ExtractedStressor[] = [],
 ): Promise<EntryAnalysis> {
-  const ctx = recent.map((e) => `[${e.date}] ${e.text}`).join("\n\n");
+  const ctx = recent
+    .slice(-MAX_RECENT_ENTRIES)
+    .map((e) => `[${e.date}] ${e.text}`)
+    .join("\n\n");
   const stressorContext = existingStressors.length
     ? `\n\nExisting stressors (reuse a label verbatim if today's entry is about it):\n` +
       existingStressors.map((s) => `- ${s.label} [${s.domain}]`).join("\n")
