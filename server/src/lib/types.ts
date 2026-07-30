@@ -1,11 +1,29 @@
 export type RiskLevel = "none" | "elevated" | "crisis";
 
-export type Domain =
-  | "exam_stress"
-  | "body_image"
-  | "loneliness"
-  | "financial_anxiety"
-  | "general";
+/**
+ * The domain vocabulary, in one place: `Domain` is derived from this list and
+ * `isDomain` validates model output against it. Must stay in step with
+ * `mobile/src/lib/types.ts` `Domain`, the domain rules in `lib/prompts.ts`, and
+ * the `domain` / `best_for` keys in `data/resources.json` + `data/grounding.json`.
+ */
+export const DOMAINS = [
+  "exam_stress",
+  "body_image",
+  "loneliness",
+  "financial_anxiety",
+  "relationship_stress",
+  "identity_uncertainty",
+  "work_burnout",
+  "sleep_fatigue",
+  "self_harm",
+  "crisis",
+  "general",
+] as const;
+
+export type Domain = (typeof DOMAINS)[number];
+
+export const isDomain = (value: unknown): value is Domain =>
+  DOMAINS.includes(value as Domain);
 
 export type Destination =
   | "crisis"
@@ -136,15 +154,5 @@ export interface RouteBriefRequest {
   concern?: string;
 }
 
-export interface SendBriefRequest {
-  briefMarkdown: string;
-  recipientKey: string;
-  patientName: string;
-  consentTimestamp: string;
-}
-
-export interface SendBriefResponse {
-  success: true;
-  recipient: string;
-  previewUrl?: string;
-}
+// The POST /api/brief/send contract lands with the route itself (README
+// build-order step 3); its consent design is specified in COMPLIANCE.md C9.

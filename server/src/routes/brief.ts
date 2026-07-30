@@ -43,4 +43,6 @@ briefRouter.post("/generate", async (req, res) => {
   }
 });
 
-// POST /send is wired in build-order step 3 (pdf.ts + email.ts).
+// POST /send is wired in build-order step 3 (pdf.ts + email.ts). It stays unbuilt
+// deliberately: COMPLIANCE.md C9 requires a per-send consent screen and an on-device
+// consent receipt first. Until then the user shares the brief via PDF export.
