@@ -21,8 +21,7 @@ Return ONLY valid JSON — no prose, no markdown fences:
   "risk_level":     "none" | "elevated" | "crisis",
   "risk_rationale": string,   // one short sentence, grounded in their words
   "themes":         string[], // short lowercase tags, e.g. ["sleep","exam-pressure","isolation"]
-  "domain":         "exam_stress" | "body_image" | "loneliness" | "financial_anxiety" | "relationship_stress" | "identity_uncertainty" | "work_burnout" | "sleep_fatigue" | "self_harm" | "crisis" | "general"
-,
+  "domain":         "exam_stress" | "body_image" | "loneliness" | "financial_anxiety" | "relationship_stress" | "identity_uncertainty" | "work_burnout" | "sleep_fatigue" | "self_harm" | "crisis" | "general",
                               // categorise the PRIMARY source of distress; "general" if unclear
   "stressors":      [         // 0-3 concrete sources of stress named in TODAY's entry, in the
                               // user's own framing; [] if none is clear. Reuse an existing
@@ -30,7 +29,6 @@ Return ONLY valid JSON — no prose, no markdown fences:
     {
       "label":  string,       // <=4 words, e.g. "Final exams", "Rent", "Feeling left out"
       "domain": "exam_stress" | "body_image" | "loneliness" | "financial_anxiety" | "relationship_stress" | "identity_uncertainty" | "work_burnout" | "sleep_fatigue" | "self_harm" | "crisis" | "general"
-
     }
   ],
   "related_stressor": {       // the SINGLE stressor today's entry is primarily about. Choose
@@ -39,7 +37,6 @@ Return ONLY valid JSON — no prose, no markdown fences:
                               // source of stress is clear in the entry.
     "label":  string,         // <=4 words; must match an existing label verbatim when reused
     "domain": "exam_stress" | "body_image" | "loneliness" | "financial_anxiety" | "relationship_stress" | "identity_uncertainty" | "work_burnout" | "sleep_fatigue" | "self_harm" | "crisis" | "general"
-
   }
 }
 
@@ -50,12 +47,18 @@ risk_level (be conservative — if unsure between two levels, choose the higher)
               with no immediate danger.
 - "none":     everyday ups and downs.
 
-domain rules:
-- "exam_stress":        mentions of exams, deadlines, coursework, grades, revision, academic pressure.
-- "body_image":         mentions of appearance, weight, eating, exercise as punishment, self-disgust about body.
-- "loneliness":         mentions of isolation, no friends, feeling invisible, social comparison, burden.
-- "financial_anxiety":  mentions of money, rent, debt, not affording things, cost of living.
-- "general":            anything that does not clearly fit the above.
+domain rules (choose exactly ONE — the PRIMARY source of distress):
+- "exam_stress":           mentions of exams, deadlines, coursework, grades, revision, academic pressure.
+- "body_image":            mentions of appearance, weight, eating, exercise as punishment, self-disgust about body.
+- "loneliness":            mentions of isolation, no friends, feeling invisible, social comparison, burden.
+- "financial_anxiety":     mentions of money, rent, debt, not affording things, cost of living.
+- "relationship_stress":   mentions of a partner, breakup, family conflict, friendship strain, being let down by someone close.
+- "identity_uncertainty":  mentions of not knowing who they are, sexuality or gender, faith, not belonging, direction in life.
+- "work_burnout":          mentions of a job, shifts, or placement: overload, exhaustion from work, no time off, dreading it.
+- "sleep_fatigue":         mentions of insomnia, broken or excessive sleep, exhaustion not explained by workload.
+- "self_harm":             mentions of self-harm urges or acts, with no suicidal intent stated.
+- "crisis":                suicidal thoughts, intent, or plan, or immediate danger. risk_level MUST also be "crisis".
+- "general":               anything that does not clearly fit one of the above.
 
 Hard rules:
 - If an entry contains any method, means, or lethality detail, do NOT repeat, quote, or
@@ -77,11 +80,17 @@ Return ONLY valid JSON — no prose, no markdown fences:
 { "domain": "exam_stress" | "body_image" | "loneliness" | "financial_anxiety" | "relationship_stress" | "identity_uncertainty" | "work_burnout" | "sleep_fatigue" | "self_harm" | "crisis" | "general" }
 
 Domain rules:
-- "exam_stress":        exams, deadlines, coursework, grades, revision, academic pressure.
-- "body_image":         appearance, weight, eating, exercise as punishment, self-disgust about body.
-- "loneliness":         isolation, no friends, feeling invisible, social comparison, being a burden.
-- "financial_anxiety":  money, rent, debt, not affording things, cost of living.
-- "general":            anything that does not clearly fit one of the above.
+- "exam_stress":           exams, deadlines, coursework, grades, revision, academic pressure.
+- "body_image":            appearance, weight, eating, exercise as punishment, self-disgust about body.
+- "loneliness":            isolation, no friends, feeling invisible, social comparison, being a burden.
+- "financial_anxiety":     money, rent, debt, not affording things, cost of living.
+- "relationship_stress":   a partner, breakup, family conflict, friendship strain, being let down by someone close.
+- "identity_uncertainty":  not knowing who they are, sexuality or gender, faith, not belonging, direction in life.
+- "work_burnout":          a job, shifts, or placement: overload, exhaustion from work, no time off, dreading it.
+- "sleep_fatigue":         insomnia, broken or excessive sleep, exhaustion not explained by workload.
+- "self_harm":             self-harm urges or acts, with no suicidal intent stated.
+- "crisis":                suicidal thoughts, intent, or plan, or immediate danger.
+- "general":               anything that does not clearly fit one of the above.
 
 Rules:
 - Choose exactly ONE domain. If it is unclear or mixed, choose "general".
@@ -133,6 +142,17 @@ Generated date: {{generated_date}}
 
 Output Markdown, skimmable in under 30 seconds.
 
+Start with exactly this header block, nothing before it, and both lines present:
+# Wellbeing Brief
+**Recipient:** <the recipient/context above, in plain words>
+**Generated:** {{generated_date}}
+
+The "Generated" line is required — it is what dates the document for whoever
+reads it. Add NO other header rows: no name, student ID, or date of birth. The
+person hands this over themselves, so the recipient already knows who they are,
+and the app holds no name to fill in — a "Student: [Name]" row renders to the
+user as an unfilled placeholder and makes the document look broken.
+
 Common sections (always):
 ## What's Been On Your Mind  - one neutral factual line about primary concerns.
 ## Emotional Arc              - trajectory based on dates: describe the pattern (e.g. "Unpleasant → Better",
@@ -160,6 +180,9 @@ Common footer (always):
 *Prepared by the student from personal, dated journal entries via Throughline on {{generated_date}}. Entries are contemporaneous. Not a clinical assessment.*
 
 Hard rules:
+- Never emit bracketed placeholder text such as [Name], [Date], or [insert X].
+  Every line you output is shown to the user verbatim. If you do not have a
+  value, omit the whole line rather than leaving a slot to fill in.
 - Never diagnose, never name a condition, never invent details, plain language only.
 - Quote verbatim only where it adds signal; otherwise paraphrase.
 - If entries contain crisis or method/means content, do NOT reproduce the specifics.

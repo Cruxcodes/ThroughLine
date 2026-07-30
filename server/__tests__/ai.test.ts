@@ -36,8 +36,19 @@ test("classifyDomain tolerates fenced JSON and a bare word", async () => {
   expect(await classifyDomain("rent is due and I'm broke")).toBe("financial_anxiety");
 });
 
+test("classifyDomain keeps the domains beyond the original five", async () => {
+  claudeReplies('{"domain":"work_burnout"}');
+  expect(await classifyDomain("the placement is grinding me down")).toBe("work_burnout");
+
+  claudeReplies('{"domain":"sleep_fatigue"}');
+  expect(await classifyDomain("awake until 4am again")).toBe("sleep_fatigue");
+});
+
 test("classifyDomain fails safe to general on garbage or network error", async () => {
   claudeReplies("not a domain");
+  expect(await classifyDomain("anything")).toBe("general");
+
+  claudeReplies('{"domain":"invented_domain"}');
   expect(await classifyDomain("anything")).toBe("general");
 
   mockCreate.mockRejectedValue(new Error("network down"));
@@ -98,6 +109,24 @@ test("processEntry marks a brand-new stressor as isNew=true", async () => {
   expect(a.related_stressor?.label).toBe("Rent");
 });
 
+test("processEntry coerces a domain outside the vocabulary to general", async () => {
+  claudeReplies(
+    '{"next_prompt":"q","risk_level":"elevated","risk_rationale":"r","themes":[],"domain":"invented_domain","stressors":[{"label":"Rent","domain":"nonsense"}]}'
+  );
+  const a = await processEntry([], "today was hard");
+  expect(a.domain).toBe("general");
+  expect(a.stressors?.[0]).toEqual({ label: "Rent", domain: "general" });
+});
+
+test("processEntry keeps a domain the old five-value list would have dropped", async () => {
+  claudeReplies(
+    '{"next_prompt":"q","risk_level":"elevated","risk_rationale":"r","themes":["sleep"],"domain":"sleep_fatigue","related_stressor":{"label":"Broken sleep","domain":"sleep_fatigue"}}'
+  );
+  const a = await processEntry([], "awake until 4am again");
+  expect(a.domain).toBe("sleep_fatigue");
+  expect(a.related_stressor?.domain).toBe("sleep_fatigue");
+});
+
 test("processEntry fails safe to elevated on unparseable output", async () => {
   claudeReplies("not json at all");
   const a = await processEntry([], "today was hard");
@@ -112,6 +141,20 @@ test("processEntry forces empty next_prompt on crisis", async () => {
   const a = await processEntry([], "farewell");
   expect(a.risk_level).toBe("crisis");
   expect(a.next_prompt).toBe("");
+});
+
+test("processEntry caps how much history reaches the model", async () => {
+  claudeReplies('{"next_prompt":"q","risk_level":"none","risk_rationale":"r","themes":[]}');
+  const history = Array.from({ length: 50 }, (_, i) => ({
+    id: String(i),
+    date: "2026-05-15",
+    text: `entry ${i}`,
+    createdAt: i,
+  })) as Entry[];
+  await processEntry(history, "today was hard");
+  const sent = mockCreate.mock.calls[0][0].messages[0].content as string;
+  expect(sent).toContain("entry 49");
+  expect(sent).not.toContain("entry 29");
 });
 
 test("processEntry fails safe when the network throws", async () => {
